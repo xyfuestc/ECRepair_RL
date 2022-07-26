@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="9a1a6e2e-d442-49be-9788-4ee3b7c1da77" name="RL_ECRepair" url="https://121.48.165.171:80">
+        <fileTransfer host="121.48.165.171" port="22" privateKey="$USER_HOME$/.ssh/id_rsa" rootFolder="/home/sean" accessType="SFTP" username="sean" keyPair="true">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

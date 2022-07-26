@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" serverName="RL_ECRepair">
+    <serverData>
+      <paths name="RL_ECRepair">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/RL" local="$PROJECT_DIR$/../../../../../../../RL_ECRepair" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+  </component>
+</project>
