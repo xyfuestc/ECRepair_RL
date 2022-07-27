@@ -3,7 +3,7 @@ M=[]
 
 def main():
 
-    n, k, l = 14, 12, 1000
+    n, k, l = 5, 3, 10
     uploads, downloads = [], []
     for i in range(0, n-1):  # 第n-1个节点为替换节点
         uploads.append((i, 0))
