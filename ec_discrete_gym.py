@@ -114,10 +114,10 @@ class CornGame(gym.Env):
 
             # 已经完成了的di列,就没必要继续操作了
             if di in self.corn_done_ids:
-                reward += -1000
+                reward += -10000000
             # 如果di列已经出现了k合并,目的地不是n-1,则受罚
             if self.col_contain_k_corns(di) and j != self.n - 1:
-                reward += -1000
+                reward += -10000000
 
             # 如果这一步让di列的玉米满了,则奖励1分
             if j == self.n - 1 and new_s[j, di] != self.s[j, di] \
@@ -127,7 +127,7 @@ class CornGame(gym.Env):
                 self.corn_done_ids.append(di)
             # 如果这一步操作无效果,则扣分
             if new_s[j, di] == self.s[j, di]:
-                reward += -1000
+                reward += -100000000
 
 
 
