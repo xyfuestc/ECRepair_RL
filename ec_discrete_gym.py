@@ -72,6 +72,13 @@ class CornGame(gym.Env):
     def isDone(self):
         return True if len(self.corn_done_ids) == self.l else False
 
+    def col_contain_k_corns(self, col):
+        col_values = self.s[:,col]
+        for v in col_values:
+            if bin(v).count("1") >= self.k:
+                return True
+        return False
+
     def render(self):
         print("current state: ", self.s)
 
@@ -102,14 +109,14 @@ class CornGame(gym.Env):
             i, di, j = action
             self.s[i, di].astype(int)
             self.s[j, di].astype(int)
-            oldValue = self.s[j, di]
             # 按位或
             new_s[j, di] |= self.s[i, di]
-            # self.S[i, di] = 0
-            # s_copy[i, di] = self.S[i, di]
 
             # 已经完成了的di列,就没必要继续操作了
             if di in self.corn_done_ids:
+                reward += -1000
+            # 如果di列已经出现了k合并,目的地不是n-1,则受罚
+            if self.col_contain_k_corns(di) and j != self.n - 1:
                 reward += -1000
 
             # 如果这一步让di列的玉米满了,则奖励1分
@@ -121,6 +128,8 @@ class CornGame(gym.Env):
             # 如果这一步操作无效果,则扣分
             if new_s[j, di] == self.s[j, di]:
                 reward += -1000
+
+
 
         if len(actions) == self.n - 1:
             reward += 1

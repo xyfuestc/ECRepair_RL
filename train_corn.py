@@ -34,8 +34,8 @@ def init_logger():
     return logger
 
 def main():
-    n, k, l = 5, 3, 10
-    n_steps = 4096
+    n, k, l = 5, 3, 3
+    n_steps = 256
     total_steps = 102400
     batch_size = 128
     env = CornGame(n, k, l)
