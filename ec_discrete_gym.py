@@ -4,8 +4,8 @@ import copy
 from gym.spaces import MultiDiscrete
 
 
-class ECRepairEnv(gym.Env):
-    def __init__(self, n, k, l):
+class CornGame(gym.Env):
+    def __init__(self, n=5, k=3, l=3):
         self.action_space = MultiDiscrete(np.ones(n - 1) * n * l)
         # self.action_space = gym.spaces.Discrete(N*L)
         self.n = n  # 节点数
@@ -15,12 +15,13 @@ class ECRepairEnv(gym.Env):
         self.S = np.zeros((n, l), dtype=np.int32)
         self.sSet = []
         self.eSet = []
-
+        self.corn_done_ids = []
         low = np.zeros(n * l)
         high = np.ones(n * l) * (2 ^ (n - 1) - 1)  # 每个数据块最大值：2^N-1
         self.observation_space = gym.spaces.Box(low, high, dtype=np.int32)
         self.np_random = None
         self._initial()
+
 
     def _initial(self):
         self.seed()
@@ -42,6 +43,7 @@ class ECRepairEnv(gym.Env):
         self.S[i + 1] = 0
         self.sSet = []  # 已使用起点集
         self.eSet = []  # 已使用终点集
+        self.corn_done_ids = [] # 初始化已完成的玉米篮子
 
         return self._make_state()
 
@@ -68,11 +70,7 @@ class ECRepairEnv(gym.Env):
         return conflictIndexes
 
     def isDone(self):
-        for v in self.S[self.n - 1]:
-            if bin(v).count("1") < self.k:
-                return False
-
-        return True
+        return True if len(self.corn_done_ids) == self.l else False
 
     def render(self):
         print("current state: ", self.S)
@@ -85,12 +83,6 @@ class ECRepairEnv(gym.Env):
             act_id = act[i]
             actIDs.append((i, act_id % self.l, int(act_id / self.l)))
 
-        # actIDs = [(0, 2, 4), (1, 0, 4), (2, 0, 1), (3, 2, 4)]
-
-        # print(actIDs)
-
-
-
         actions = copy.deepcopy(actIDs)
 
 
@@ -99,13 +91,12 @@ class ECRepairEnv(gym.Env):
         for i in reversed(conflictIndexes):
             del actions[i]
 
-
+        reward = -1.0
 
         print(actions)
         # 拷贝一份状态,避免出现a->b同时b->c,出现c=a+b的情况,因为是同时进行,所以c只与之前的b有关
         s_copy = copy.deepcopy(self.S)
 
-        reward = -1.0
         # 合并数据
         for action in actions:
             i, di, j = action
@@ -114,14 +105,25 @@ class ECRepairEnv(gym.Env):
             oldValue = self.S[j, di]
             # 按位或
             s_copy[j, di] |= self.S[i, di]
-            # if self.S[j, di] != s_copy[j, di] and j == self.n - 1:
-            #     reward += 0.0001 * (len(actions) - 1)
+            # self.S[i, di] = 0
+            # s_copy[i, di] = self.S[i, di]
+
+            # 已经完成了的di列,就没必要继续操作了
+            # if di in self.corn_done_ids:
+            #     reward += -10
+
+            # 如果这一步让di列的玉米满了,则奖励1分
+            if self.S[self.n - 1, di] != s_copy[self.n - 1, di] \
+                    and bin(s_copy[j, di]).count("1") >= self.k \
+                    and di not in self.corn_done_ids:
+                reward += 1
+                self.corn_done_ids.append(di)
+            # 如果这一步操作无效果,则扣分
             # if self.S[j, di] == s_copy[j, di]:
-            #     reward += -0.01
+            #     reward += -10
 
         # if len(actions) == self.n - 1:
         #     reward += 0.01
-
 
         self.S = s_copy
 
@@ -130,7 +132,7 @@ class ECRepairEnv(gym.Env):
         done = self.isDone()
 
         if done:
-            reward = 0.0
+            reward = 100
 
 
         # print('step: ', action)
