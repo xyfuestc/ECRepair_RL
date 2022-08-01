@@ -12,7 +12,7 @@ class CornGame(gym.Env):
         self.l = l  # 块数
         self.k = k  # 数据节点数
         # self.S = np.zeros(N*L).reshape(N, L)  #状态矩阵
-        self.S = np.zeros((n, l), dtype=np.int32)
+        self.s = np.zeros((n, l), dtype=np.int32)
         self.sSet = []
         self.eSet = []
         self.corn_done_ids = []
@@ -36,11 +36,11 @@ class CornGame(gym.Env):
         # di = 2^i
         # S2 = self.S.reshape(self.N, self.L)
         for i in range(0, self.n - 1):
-            self.S[i] = pow(2, i)
+            self.s[i] = pow(2, i)
             # logger.info(' S[{}] = {} '.format(i, self.S[i]))
 
         # 替换节点DN数据为空
-        self.S[i + 1] = 0
+        self.s[i + 1] = 0
         self.sSet = []  # 已使用起点集
         self.eSet = []  # 已使用终点集
         self.corn_done_ids = [] # 初始化已完成的玉米篮子
@@ -51,7 +51,7 @@ class CornGame(gym.Env):
         return self.n, self.k, self.l
 
     def _make_state(self):
-        return self.S.ravel()  # 返回一维数组
+        return self.s.ravel()  # 返回一维数组
 
     def getConflictIndexes(self, actList):
         conflictIndexes = []
@@ -73,7 +73,7 @@ class CornGame(gym.Env):
         return True if len(self.corn_done_ids) == self.l else False
 
     def render(self):
-        print("current state: ", self.S)
+        print("current state: ", self.s)
 
     def step(self, act):
 
@@ -95,37 +95,37 @@ class CornGame(gym.Env):
 
         print(actions)
         # 拷贝一份状态,避免出现a->b同时b->c,出现c=a+b的情况,因为是同时进行,所以c只与之前的b有关
-        s_copy = copy.deepcopy(self.S)
+        new_s = copy.deepcopy(self.s)
 
         # 合并数据
         for action in actions:
             i, di, j = action
-            self.S[i, di].astype(int)
-            self.S[j, di].astype(int)
-            oldValue = self.S[j, di]
+            self.s[i, di].astype(int)
+            self.s[j, di].astype(int)
+            oldValue = self.s[j, di]
             # 按位或
-            s_copy[j, di] |= self.S[i, di]
+            new_s[j, di] |= self.s[i, di]
             # self.S[i, di] = 0
             # s_copy[i, di] = self.S[i, di]
 
             # 已经完成了的di列,就没必要继续操作了
-            # if di in self.corn_done_ids:
-            #     reward += -10
+            if di in self.corn_done_ids:
+                reward += -1000
 
             # 如果这一步让di列的玉米满了,则奖励1分
-            if self.S[self.n - 1, di] != s_copy[self.n - 1, di] \
-                    and bin(s_copy[j, di]).count("1") >= self.k \
+            if j == self.n - 1 and new_s[j, di] != self.s[j, di] \
+                    and bin(new_s[j, di]).count("1") >= self.k \
                     and di not in self.corn_done_ids:
                 reward += 1
                 self.corn_done_ids.append(di)
             # 如果这一步操作无效果,则扣分
-            # if self.S[j, di] == s_copy[j, di]:
-            #     reward += -10
+            if new_s[j, di] == self.s[j, di]:
+                reward += -1000
 
-        # if len(actions) == self.n - 1:
-        #     reward += 0.01
+        if len(actions) == self.n - 1:
+            reward += 1
 
-        self.S = s_copy
+        self.s = new_s
 
 
         state = self._make_state()
