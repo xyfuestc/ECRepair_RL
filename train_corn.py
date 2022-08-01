@@ -3,7 +3,8 @@ from ec_discrete_gym import CornGame
 # system parameter stable
 import logging
 from stable_baselines3.common.env_util import make_vec_env
-from os.path import exists
+from pathlib import Path
+
 
 # env = make_vec_env("CartPole-v1", n_envs=4)
 
@@ -49,7 +50,10 @@ def main():
                 batch_size=batch_size, n_steps=n_steps)
 
     # del model
-    # model = PPO.load(path, env=env)
+    model_file = Path(path + ".zip")
+    if model_file.is_file():
+        print('载入model文件:{}'.format(path))
+        model = PPO.load(path, env=env)
     model.learn(total_timesteps=total_steps)
     model.save(path)
 
