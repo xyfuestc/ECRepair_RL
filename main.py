@@ -34,20 +34,21 @@ def init_logger():
     return logger
 
 def main():
-    n, k, l = 5, 3, 10
-    # n_steps = 64
-    total_steps = 409600
+    n, k, l = 5, 3, 100
+    n_steps = 10240
+    total_steps = 40960000
+    batch_size=10240
     env = ECRepairEnv(n, k, l)
     path = "ppo_ec"+str(n)+str(k)+str(l)
     #
-    # model = PPO("MlpPolicy", env, verbose=1, device="cpu", learning_rate=2e-4,
-    #             gamma=0.995, gae_lambda= 0.98, n_steps=n_steps, batch_size=128)
+    model = PPO("MlpPolicy", env, verbose=1, device="cpu", learning_rate=2e-4,
+                gamma=0.995, gae_lambda= 0.98, n_steps=n_steps, batch_size=batch_size)
 
     # env = make_vec_env("ECRepairEnv-v0", n_envs=4)
-    model = PPO("MlpPolicy", env, verbose=1, device="cpu", n_steps=total_steps)
+    # model = PPO("MlpPolicy", env, verbose=1, device="cpu", n_steps=total_steps)
 
     # del model
-    model = PPO.load(path, env=env)
+    # model = PPO.load(path, env=env)
     model.learn(total_timesteps=total_steps)
     model.save(path)
 
