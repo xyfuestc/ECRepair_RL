@@ -1,12 +1,7 @@
 from stable_baselines3 import PPO
-from ec_discrete_gym import CornGame
-# system parameter stable
 import logging
-from stable_baselines3.common.env_util import make_vec_env
 from pathlib import Path
-
-
-# env = make_vec_env("CartPole-v1", n_envs=4)
+from ec_gym_agents import JointActionCornGame
 
 
 def init_logger():
@@ -38,10 +33,10 @@ def main():
     n, k, l = 5, 3, 3
     target_step = 5
     n_steps = 256
-    total_steps = 102400
+    total_steps = n_steps * 500
     batch_size = 128
-    env = CornGame(n, k, l)
-    path = "ppo_corn"+str(n)+str(k)+str(l)
+    env = JointActionCornGame(n, k, l)
+    path = "ppo_ec_joint"+str(n)+str(k)+str(l)
     #
     # model = PPO("MlpPolicy", env, verbose=1, device="cpu", learning_rate=2e-4,
     #             gamma=0.995, gae_lambda= 0.98, n_steps=n_steps, batch_size=batch_size)
@@ -59,7 +54,6 @@ def main():
     model.save(path)
 
     logger = init_logger()
-    reward = 0.0
     test_steps = 0
     test_nums = 0
     while True:
@@ -70,11 +64,22 @@ def main():
         step = 0
         reward = 0.0
         while not done:
-            action, _states = model.predict(obs)
-            obs, rewards, done, _ = env.step(action)
+            # 分节点Node i联合行动
+            last_acts = []
+            for i in range(0, n-1):
+                obs.append(i)
+                action, _states = model.predict(obs)
+                env.set_node_id(i)
+                obs, rewards, done, _ = env.step(action)
+                # 记录上一节点行动
+                last_acts.append((i, action%l, action/l))
+                env.set_last_acts(last_acts)
+                print('当前节点:{}, 上次行动为:{}'.format(i, last_acts))
+
+                reward += rewards
+                env.render()
+
             step += 1
-            reward += rewards
-            env.render()
 
         print('成功！({},{},{})总共花了{}步, reward={}.'.format(n, k, l, step, reward))
         logger.info('成功！({},{},{})总共花了{}步, reward={}.'.format(n, k, l, step, reward))
@@ -92,7 +97,6 @@ def main():
 
     print('成功达到目标要求.')
     logger.info('成功达到目标要求.')
-
 
 
 

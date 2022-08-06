@@ -100,7 +100,7 @@ class CornGame(gym.Env):
 
         reward = -1.0
 
-        print(actions)
+        # print(actions)
         # 拷贝一份状态,避免出现a->b同时b->c,出现c=a+b的情况,因为是同时进行,所以c只与之前的b有关
         new_s = copy.deepcopy(self.s)
 

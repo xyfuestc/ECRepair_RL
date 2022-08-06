@@ -10,7 +10,7 @@ def main():
     for i in range(0, n):
         downloads.append((i, 0))
 
-    # print('uploads: {}, downloads:{}.'.format(uploads, downloads))
+    print('uploads: {}, downloads:{}.'.format(uploads, downloads))
 
     t = Tasks()
     for j in range(0, l):
@@ -169,6 +169,7 @@ class DFS_hungary():
 
     def print_max_paths(self):
         print('最大匹配数:{}'.format(self.res))
+        print('M:{}'.format(self.M))
         for u,v in enumerate(self.cx):
             if v != -1:
                 print('({}, {})'.format(u, v))

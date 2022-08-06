@@ -5,7 +5,7 @@ from model import Model
 from replay_memory import ReplayMemory
 import numpy as np
 import gym
-from MyGym import ECRepair
+from ECGym import ECRepairEnv
 from proxy import Proxy
 import time
 MAX_EPISODE = 2000
@@ -81,7 +81,7 @@ def test_episode(env, proxy, Render=False):
 def main():
     # 配置N-节点数，K-数据节点数，L-条带数
     n, k, l = 5, 3, 3
-    env = ECRepair(n, k, l)  # N = 5, K = 3, L = 3
+    env = ECRepairEnv(n, k, l)  # N = 5, K = 3, L = 3
     #  act_dim = env.action_space.n
     # obs_dim = env.observation_space.shape[0]  # CartPole-v0: (4,)
     models, algorithms, agents = [], [], []
