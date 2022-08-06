@@ -58,7 +58,7 @@ def main():
     # model.save(path)
 
     logger = init_logger()
-    test_steps = 0
+    step = 0
     test_nums = 0
     while True:
 
@@ -77,7 +77,7 @@ def main():
         print('成功！({},{},{})总共花了{}步, reward={}.'.format(n, k, l, step, reward))
         logger.info('成功！({},{},{})总共花了{}步, reward={}.'.format(n, k, l, step, reward))
 
-        if test_steps <= target_step:
+        if step <= target_step:
             break
 
         test_nums += 1
